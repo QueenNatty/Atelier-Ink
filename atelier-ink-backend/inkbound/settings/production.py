@@ -1,9 +1,11 @@
 from .base import *  # noqa
 from decouple import config, Csv
+import os
 
 DEBUG = False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 DATABASES = {
     "default": {
