@@ -56,9 +56,10 @@ export default function Step2Creative() {
 
   const canProceed =
     (tattooPath === 'flash' && flashDesignId !== null) ||
-    (tattooPath === 'custom' && customPlacement.length > 0)
-
-  return (
+    (tattooPath === 'custom' && customPlacement.length > 0 )
+      
+      
+    return (
     <div>
       <p className="section-label mb-3">Step 2</p>
       <h2 className="display-heading text-4xl text-ink-white mb-2">Your Design</h2>
@@ -146,10 +147,10 @@ export default function Step2Creative() {
             </label>
             <input
               type="text"
-              placeholder="e.g. 3" × 2" or fist-sized"
-              value={customDimensions}
-              onChange={(e) => setCustomDimensions(e.target.value)}
-              className="input-ink"
+              placeholder="e.g. 3in * 2in or fist-sized"
+            value={customDimensions}
+            onChange={(e) => setCustomDimensions(e.target.value)}
+            className="input-ink"
             />
           </div>
 

@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -27,14 +28,16 @@ class ConsultationSlotViewSet(viewsets.ModelViewSet):
     ordering_fields = ["date", "start_time"]
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
-            return [IsAuthenticated()]
+        if self.action in ["list", "retrieve", "available"]:
+            return [AllowAny()]
         return [IsArtistOwnerOrAdmin()]
 
     def get_queryset(self):
         qs = ConsultationSlot.objects.select_related("artist__user")
         # Default: only show upcoming available slots to regular clients
         user = self.request.user
+        if not user.is_authenticated:
+            return qs.filter(status=ConsultationSlot.Status.AVAILABLE, date__gte=timezone.now().date())
         if user.is_artist and not user.is_admin_user:
             return qs.filter(artist__user=user)
         if not user.is_admin_user:
@@ -73,7 +76,7 @@ class SessionBlockViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["list", "retrieve", "available"]:
-            return [IsAuthenticated()]
+            return [AllowAny()]
         return [IsArtistOwnerOrAdmin()]
 
     def get_queryset(self):
