@@ -82,6 +82,8 @@ class SessionBlockViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = SessionBlock.objects.select_related("artist__user", "service")
         user = self.request.user
+        if not user.is_authenticated:
+            return qs.filter(status=ConsultationSlot.Status.AVAILABLE, date__gte=timezone.now().date())
         if user.is_artist and not user.is_admin_user:
             return qs.filter(artist__user=user)
         if not user.is_admin_user:
