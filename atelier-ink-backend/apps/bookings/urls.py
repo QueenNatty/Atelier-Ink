@@ -7,6 +7,4 @@ router.register("consultation-slots", ConsultationSlotViewSet, basename="consult
 router.register("session-blocks", SessionBlockViewSet, basename="session-block")
 router.register("", BookingViewSet, basename="booking")
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
+urlpatterns = [path("", include(router.urls))]

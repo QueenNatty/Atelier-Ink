@@ -22,9 +22,9 @@ const PIERCING_PLACEMENTS: { value: PiercingPlacement; label: string }[] = [
 ]
 
 const FALLBACK_ARTISTS: ArtistList[] = [
-  { id: 1, full_name: 'Maya Rivera', bio: 'Fine line botanical & single needle portraiture.', specialty_names: ['Fine Line', 'Botanical'], avatar_url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80', is_accepting_clients: true, years_experience: 8 },
-  { id: 2, full_name: 'Kai Chen', bio: 'Black & grey realism and nature studies.', specialty_names: ['Realism', 'Black & Grey'], avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&q=80', is_accepting_clients: true, years_experience: 6 },
-  { id: 3, full_name: 'Jordan Osei', bio: 'Neo-traditional and geometric blackwork.', specialty_names: ['Geometric', 'Blackwork'], avatar_url: null, is_accepting_clients: false, years_experience: 10 },
+  { id: 1, full_name: 'Adaeze Okonkwo', bio: 'Fine line Fine line botanical & single needle portraiture. Afrocentric botanical work. Lagos-based.', specialty_names: ['Fine Line', 'Botanical'], avatar_url: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&q=80', is_accepting_clients: true, years_experience: 8 },
+  { id: 2, full_name: 'Emeka Nwosu', bio: 'Igbo uli-inspired blackwork & neo-traditional.', specialty_names: ['Realism', 'Black & Grey'], avatar_url: 'https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=300&q=80', is_accepting_clients: true, years_experience: 6 },
+  { id: 3, full_name: 'Zainab Bello', bio: 'Piercing specialist & minimalist tattoo artist.', specialty_names: ['Geometric', 'Blackwork'], avatar_url: null, is_accepting_clients: false, years_experience: 10 },
 ]
 
 export default function Step1ArtistService() {

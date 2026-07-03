@@ -60,3 +60,31 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_admin_user(self):
         return self.role == self.Role.ADMIN
+
+
+class LoginHistory(models.Model):
+    """Records every login attempt for auditing — required for school project's
+    'authentication and login history' deliverable."""
+
+    class Status(models.TextChoices):
+        SUCCESS = "success", "Success"
+        FAILED = "failed", "Failed"
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="login_history",
+        null=True, blank=True,  # null when login failed because email doesn't exist
+    )
+    email_attempted = models.EmailField()
+    status = models.CharField(max_length=10, choices=Status.choices)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=512, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "Login History"
+        verbose_name_plural = "Login History"
+
+    def __str__(self):
+        who = self.user.email if self.user else self.email_attempted
+        return f"{who} — {self.status} @ {self.timestamp:%Y-%m-%d %H:%M}"

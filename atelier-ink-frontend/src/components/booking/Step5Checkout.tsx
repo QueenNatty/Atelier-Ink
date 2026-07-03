@@ -1,26 +1,31 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, CreditCard, Loader2, AlertCircle } from 'lucide-react'
+import { Lock, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
 import { useWizardStore } from '@/lib/store'
-import { bookingApi, initAuth } from '@/lib/api'
-import { formatDate, formatTime, formatCurrency, cn } from '@/lib/utils'
+import { bookingApi } from '@/lib/api'
+import { formatDate, formatTime, cn } from '@/lib/utils'
+import { useAuth } from '@/lib/auth'
+import Link from 'next/link'
+import axios from 'axios'
+
+function formatNaira(amount: number) {
+  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(amount)
+}
 
 export default function Step5Checkout() {
   const {
-    selectedArtist, anyArtist, serviceType, selectedService,
-    piercingPlacement, tattooPath, flashDesignId,
-    customPlacement, selectedSlot, selectedBlock,
-    setBookingResult, prevStep,
+    selectedArtist, serviceType,
+    piercingPlacement, tattooPath, flashDesignId, customPlacement,
+    selectedSlot, selectedBlock, setBookingResult, prevStep,
   } = useWizardStore()
 
+  const { user, isLoggedIn } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const isSession = !!selectedBlock
-  const depositAmount = isSession
-    ? parseFloat(selectedBlock?.deposit_required || '50')
-    : 0
+  const depositAmount = isSession ? parseFloat(selectedBlock?.deposit_required || '0') : 0
   const artistName = selectedArtist?.full_name || 'First Available Artist'
   const date = selectedSlot?.date || selectedBlock?.date
   const startTime = selectedSlot?.start_time || selectedBlock?.start_time
@@ -29,10 +34,21 @@ export default function Step5Checkout() {
   const handleConfirm = async () => {
     setLoading(true)
     setError(null)
-    initAuth()
+
+    // Get token fresh from localStorage
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      setError('Session expired. Please sign in again.')
+      setLoading(false)
+      return
+    }
+
+    const authHeader = { Authorization: `Bearer ${token}` }
+    const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
     try {
-      const payload: Parameters<typeof bookingApi.createBooking>[0] = {
+      // Step 1: Create the booking
+      const bookingPayload: Parameters<typeof bookingApi.createBooking>[0] = {
         artist: selectedArtist?.id || 1,
         booking_type: isSession ? 'session' : 'consultation',
         ...(selectedSlot && { consultation_slot: selectedSlot.id }),
@@ -46,18 +62,74 @@ export default function Step5Checkout() {
         placement: customPlacement || piercingPlacement || '',
       }
 
-      const res = await bookingApi.createBooking(payload)
-      setBookingResult(res.data)
+      const bookingRes = await axios.post(
+        `${API}/api/v1/bookings/`,
+        bookingPayload,
+        { headers: authHeader }
+      )
+      const booking = bookingRes.data
+
+      // Step 2: If deposit required, initiate Paystack
+      if (isSession && depositAmount > 0) {
+        const payRes = await axios.post(
+          `${API}/api/v1/payments/initiate/`,
+          { booking_id: booking.id },
+          { headers: authHeader }
+        )
+        // Redirect to Paystack checkout page
+        window.location.href = payRes.data.authorization_url
+        return
+      }
+
+      // Free consultation — go straight to confirmation
+      setBookingResult(booking)
     } catch (err: any) {
-      const msg = err.response?.data?.detail
-        || err.response?.data?.non_field_errors?.[0]
-        || 'Something went wrong. Please try again.'
-      setError(msg.includes('Authentication') || msg.includes('credentials')
-        ? 'Please log in to complete your booking.'
-        : msg)
+      const data = err.response?.data
+      let msg = 'Something went wrong. Please try again.'
+
+      if (err.response?.status === 401) {
+        msg = 'Session expired. Please sign out and sign in again.'
+      } else if (data?.detail) {
+        msg = data.detail
+      } else if (data?.non_field_errors?.[0]) {
+        msg = data.non_field_errors[0]
+      } else if (data?.consultation_slot) {
+        msg = 'That slot is no longer available. Please go back and pick another.'
+      } else if (data?.session_block) {
+        msg = data.session_block[0] || msg
+      }
+
+      setError(msg)
     } finally {
       setLoading(false)
     }
+  }
+
+  // Must be logged in to book
+  if (!isLoggedIn) {
+    return (
+      <div className="text-center py-8">
+        <p className="section-label mb-3">Step 5</p>
+        <h2 className="display-heading text-4xl text-ink-white mb-4">Almost There</h2>
+        <p className="font-body text-ink-silver mb-8 max-w-sm mx-auto">
+          You need an account to complete your booking and process your deposit securely via Paystack.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/login?next=/book" className="btn-primary justify-center">
+            Sign In
+          </Link>
+          <Link href="/register" className="btn-ghost justify-center">
+            Create Account
+          </Link>
+        </div>
+        <button
+          onClick={prevStep}
+          className="mt-6 font-body text-xs text-ink-ash hover:text-gold transition-colors tracking-widest uppercase block mx-auto"
+        >
+          ← Back
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -65,23 +137,22 @@ export default function Step5Checkout() {
       <p className="section-label mb-3">Step 5</p>
       <h2 className="display-heading text-4xl text-ink-white mb-2">Review & Pay</h2>
       <p className="font-body text-ink-silver mb-10">
-        Confirm your booking details and secure your slot with a deposit.
+        Confirm your booking details and secure your slot.
       </p>
 
       {/* Summary card */}
       <div className="bg-ink-charcoal border border-ink-steel p-6 mb-6">
         <p className="section-label mb-5">Booking Summary</p>
-
         <div className="space-y-4">
           {[
             { label: 'Artist', value: artistName },
             { label: 'Service', value: serviceType ? serviceType.charAt(0).toUpperCase() + serviceType.slice(1) : '—' },
             ...(piercingPlacement ? [{ label: 'Placement', value: piercingPlacement.charAt(0).toUpperCase() + piercingPlacement.slice(1) }] : []),
             ...(tattooPath ? [{ label: 'Type', value: tattooPath === 'flash' ? `Flash design #${flashDesignId}` : 'Custom piece' }] : []),
-            ...(customPlacement ? [{ label: 'Placement', value: customPlacement }] : []),
+            ...(customPlacement ? [{ label: 'Brief', value: customPlacement }] : []),
             { label: 'Date', value: date ? formatDate(date) : '—' },
             { label: 'Time', value: startTime ? `${formatTime(startTime)}${endTime ? ` – ${formatTime(endTime)}` : ''}` : '—' },
-            { label: 'Type', value: isSession ? 'Session Block' : 'Consultation' },
+            { label: 'Type', value: isSession ? 'Session Block' : 'Free Consultation' },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between items-start gap-4">
               <span className="font-body text-xs text-ink-ash tracking-widest uppercase flex-shrink-0">{label}</span>
@@ -93,55 +164,38 @@ export default function Step5Checkout() {
         <div className="border-t border-ink-steel mt-6 pt-6 flex justify-between items-center">
           <span className="font-body text-sm text-ink-silver">Deposit Due Today</span>
           <span className="font-display text-3xl text-gold">
-            {isSession ? formatCurrency(depositAmount) : 'Free'}
+            {isSession ? formatNaira(depositAmount) : 'Free'}
           </span>
         </div>
         {isSession && (
           <p className="font-body text-xs text-ink-ash mt-2">
-            Deposit goes toward your final session cost.
+            Deposit deducted from your final session cost. Non-refundable within 48hrs of appointment.
           </p>
         )}
       </div>
 
-      {/* Payment mockup */}
+      {/* Paystack notice */}
       {isSession && (
-        <div className="border border-ink-steel p-6 mb-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Lock size={14} className="text-gold" />
-            <p className="font-body text-xs text-ink-silver tracking-widest uppercase">
-              Secure Payment
+        <div className="border border-ink-steel p-5 mb-6 flex items-center gap-4 bg-ink-charcoal">
+          <Lock size={18} className="text-gold flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-body text-sm text-ink-white font-medium">Secure Payment via Paystack</p>
+            <p className="font-body text-xs text-ink-ash mt-0.5">
+              You'll be redirected to Paystack to pay {formatNaira(depositAmount)}.
+              Card, bank transfer, USSD & mobile money accepted.
             </p>
           </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="font-body text-xs text-ink-ash tracking-widest uppercase block mb-2">
-                Card Number
-              </label>
-              <div className="input-ink flex items-center gap-3 cursor-not-allowed opacity-60">
-                <CreditCard size={16} className="text-ink-ash flex-shrink-0" />
-                <span className="text-ink-ash">•••• •••• •••• ••••</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="font-body text-xs text-ink-ash tracking-widest uppercase block mb-2">Expiry</label>
-                <div className="input-ink opacity-60 cursor-not-allowed text-ink-ash">MM / YY</div>
-              </div>
-              <div>
-                <label className="font-body text-xs text-ink-ash tracking-widest uppercase block mb-2">CVC</label>
-                <div className="input-ink opacity-60 cursor-not-allowed text-ink-ash">•••</div>
-              </div>
-            </div>
-          </div>
-
-          <p className="font-body text-xs text-ink-ash mt-4 flex items-center gap-2">
-            <Lock size={10} />
-            Payment processing via Stripe. Your card details are never stored by us.
-          </p>
+          <ExternalLink size={14} className="text-ink-ash flex-shrink-0" />
         </div>
       )}
+
+      {/* Logged in as */}
+      <div className="border border-ink-steel p-4 mb-6 flex items-center justify-between bg-ink-charcoal">
+        <div>
+          <p className="font-body text-xs text-ink-ash tracking-widest uppercase">Booking as</p>
+          <p className="font-body text-sm text-ink-white mt-1">{user?.full_name} — {user?.email}</p>
+        </div>
+      </div>
 
       {error && (
         <div className="flex items-start gap-3 p-4 border border-red-900 bg-red-900/10 mb-6">
@@ -155,12 +209,14 @@ export default function Step5Checkout() {
         <button
           onClick={handleConfirm}
           disabled={loading}
-          className={cn('btn-primary min-w-40 justify-center', loading && 'opacity-70 cursor-wait')}
+          className={cn('btn-primary min-w-44 justify-center', loading && 'opacity-70 cursor-wait')}
         >
           {loading ? (
             <><Loader2 size={16} className="animate-spin" /> Processing...</>
+          ) : isSession ? (
+            <>Pay {formatNaira(depositAmount)} <ExternalLink size={14} /></>
           ) : (
-            isSession ? `Pay ${formatCurrency(depositAmount)}` : 'Confirm Booking'
+            'Confirm Booking'
           )}
         </button>
       </div>

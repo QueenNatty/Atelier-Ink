@@ -6,33 +6,23 @@ from apps.studio.models import Artist, Service
 
 
 class ConsultationSlot(models.Model):
-    """
-    A short fixed-length slot (e.g. 30 min) for free consultations.
-    Artists define these; clients book them.
-    """
-
     class Status(models.TextChoices):
         AVAILABLE = "available", "Available"
         BOOKED = "booked", "Booked"
         CANCELLED = "cancelled", "Cancelled"
         COMPLETED = "completed", "Completed"
 
-    artist = models.ForeignKey(
-        Artist, on_delete=models.CASCADE, related_name="consultation_slots"
-    )
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="consultation_slots")
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.AVAILABLE
-    )
-    notes = models.TextField(blank=True, help_text="Internal artist notes")
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.AVAILABLE)
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["date", "start_time"]
-        # An artist cannot have overlapping consultation slots
         constraints = [
             models.UniqueConstraint(
                 fields=["artist", "date", "start_time"],
@@ -60,36 +50,21 @@ class ConsultationSlot(models.Model):
 
 
 class SessionBlock(models.Model):
-    """
-    A multi-hour work session block that an artist blocks out for tattoo/
-    piercing appointments. Can span several hours; divided into segments
-    that map to individual Bookings.
-    """
-
     class Status(models.TextChoices):
-        OPEN = "open", "Open"          # Block exists, slots available
-        FULL = "full", "Fully Booked"  # All hours assigned
+        OPEN = "open", "Open"
+        FULL = "full", "Fully Booked"
         CANCELLED = "cancelled", "Cancelled"
         COMPLETED = "completed", "Completed"
 
-    artist = models.ForeignKey(
-        Artist, on_delete=models.CASCADE, related_name="session_blocks"
-    )
-    service = models.ForeignKey(
-        Service, on_delete=models.SET_NULL, null=True, blank=True
-    )
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="session_blocks")
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
-    # How many hours are already reserved (denormalised for query speed)
     booked_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.OPEN
-    )
-    deposit_required = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0,
-        help_text="Deposit amount required to reserve this block"
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
+    # Deposit in Naira
+    deposit_required = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -98,14 +73,7 @@ class SessionBlock(models.Model):
         ordering = ["date", "start_time"]
 
     def __str__(self):
-        return (
-            f"{self.artist.user.full_name} — {self.date} "
-            f"{self.start_time:%H:%M}–{self.end_time:%H:%M}"
-        )
-
-    def clean(self):
-        if self.start_time >= self.end_time:
-            raise ValidationError("Start time must be before end time.")
+        return f"{self.artist.user.full_name} — {self.date} {self.start_time:%H:%M}–{self.end_time:%H:%M}"
 
     @property
     def total_hours(self):
@@ -119,7 +87,6 @@ class SessionBlock(models.Model):
         return self.total_hours - float(self.booked_hours)
 
     def recalculate_status(self):
-        """Update status based on booked hours."""
         if float(self.booked_hours) >= self.total_hours:
             self.status = self.Status.FULL
         elif self.status == self.Status.FULL:
@@ -128,11 +95,6 @@ class SessionBlock(models.Model):
 
 
 class Booking(models.Model):
-    """
-    A client's booking — either against a ConsultationSlot or
-    a portion of a SessionBlock.
-    """
-
     class BookingType(models.TextChoices):
         CONSULTATION = "consultation", "Consultation"
         SESSION = "session", "Session"
@@ -145,23 +107,12 @@ class Booking(models.Model):
         CANCELLED = "cancelled", "Cancelled"
         NO_SHOW = "no_show", "No Show"
 
-    # ── Who & What ────────────────────────────────────────────────────────────
-    client = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="bookings"
-    )
-    artist = models.ForeignKey(
-        Artist, on_delete=models.CASCADE, related_name="bookings"
-    )
-    service = models.ForeignKey(
-        Service, on_delete=models.SET_NULL, null=True
-    )
-
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="bookings")
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
     booking_type = models.CharField(max_length=20, choices=BookingType.choices)
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.PENDING
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
-    # ── Slot / Block Link ─────────────────────────────────────────────────────
     consultation_slot = models.OneToOneField(
         ConsultationSlot, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="booking"
@@ -170,36 +121,18 @@ class Booking(models.Model):
         SessionBlock, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="bookings"
     )
-
-    # ── Session Timing (for session bookings within a block) ──────────────────
     session_date = models.DateField(null=True, blank=True)
     session_start_time = models.TimeField(null=True, blank=True)
-    session_hours = models.DecimalField(
-        max_digits=4, decimal_places=1, null=True, blank=True,
-        help_text="Number of hours reserved within the session block"
-    )
+    session_hours = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
 
-    # ── Client Details ────────────────────────────────────────────────────────
-    description = models.TextField(
-        blank=True, help_text="Client's description of what they want"
-    )
-    reference_image = models.CharField(
-        max_length=255, blank=True
-    )
-    placement = models.CharField(
-        max_length=150, blank=True, help_text="Body placement for tattoo/piercing"
-    )
+    description = models.TextField(blank=True)
+    placement = models.CharField(max_length=150, blank=True)
 
-    # ── Pricing ───────────────────────────────────────────────────────────────
-    quoted_price = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
-    )
-    deposit_amount = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0
-    )
+    # All prices in Naira
+    quoted_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     deposit_paid = models.BooleanField(default=False)
 
-    # ── Internal ──────────────────────────────────────────────────────────────
     artist_notes = models.TextField(blank=True)
     cancellation_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -209,26 +142,12 @@ class Booking(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return (
-            f"Booking #{self.pk} — {self.client.full_name} "
-            f"with {self.artist.user.full_name} ({self.get_status_display()})"
-        )
-
-    def clean(self):
-        if self.booking_type == self.BookingType.CONSULTATION and not self.consultation_slot:
-            raise ValidationError("Consultation bookings must have a slot.")
-        if self.booking_type == self.BookingType.SESSION and not self.session_block:
-            raise ValidationError("Session bookings must have a session block.")
-
-    def confirm(self):
-        self.status = self.Status.CONFIRMED
-        self.save(update_fields=["status", "updated_at"])
+        return f"Booking #{self.pk} — {self.client.full_name} ({self.get_status_display()})"
 
     def cancel(self, reason=""):
         self.status = self.Status.CANCELLED
         self.cancellation_reason = reason
         self.save(update_fields=["status", "cancellation_reason", "updated_at"])
-        # Free up the slot/block
         if self.consultation_slot:
             self.consultation_slot.status = ConsultationSlot.Status.AVAILABLE
             self.consultation_slot.save(update_fields=["status"])

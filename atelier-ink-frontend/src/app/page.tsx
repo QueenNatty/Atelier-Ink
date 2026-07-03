@@ -42,7 +42,7 @@ export default function HomePage() {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1600&q=80')`,
+              backgroundImage: `url('https://images.unsplash.com/photo-1618520042988-b8bb74e6d653?w=1600&q=80')`,
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-ink-black/60 via-ink-black/40 to-ink-black" />
@@ -93,7 +93,7 @@ export default function HomePage() {
             >
               <div className="flex items-center gap-2 text-ink-silver">
                 <MapPin size={14} className="text-gold" />
-                <span className="font-body text-sm">142 Marais St, New York NY</span>
+                <span className="font-body text-sm">14 Bode Thomas St, Surulere, Lagos</span>
               </div>
               <div className="flex items-center gap-2 text-ink-silver">
                 <Clock size={14} className="text-gold" />
@@ -106,7 +106,7 @@ export default function HomePage() {
                 className="flex items-center gap-2 text-ink-silver hover:text-gold transition-colors"
               >
                 <Instagram size={14} className="text-gold" />
-                <span className="font-body text-sm">@atelier.ink</span>
+                <span className="font-body text-sm">@atelierink.ng</span>
               </a>
             </div>
           </div>

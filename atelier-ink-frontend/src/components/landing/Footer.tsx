@@ -14,11 +14,11 @@ export default function Footer() {
             Fine tattoo & piercing studio. Where skin becomes canvas.
           </p>
           <div className="flex gap-4 mt-6">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+            <a href="https://instagram.com/atelierink.ng" target="_blank" rel="noopener noreferrer"
               className="text-ink-ash hover:text-gold transition-colors">
               <Instagram size={18} />
             </a>
-            <a href="mailto:hello@atelierink.com"
+            <a href="mailto:hello@atelierink.ng"
               className="text-ink-ash hover:text-gold transition-colors">
               <Mail size={18} />
             </a>
@@ -32,7 +32,7 @@ export default function Footer() {
             <div className="flex items-start gap-3">
               <MapPin size={14} className="text-gold mt-0.5 flex-shrink-0" />
               <p className="font-body text-sm text-ink-silver">
-                142 Marais Street<br />New York, NY 10013
+                14 Bode Thomas Street<br />Surulere, Lagos State
               </p>
             </div>
             <div className="flex items-start gap-3">

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User
+from .models import User, LoginHistory
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,6 +25,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             "email", "first_name", "last_name", "phone",
             "password", "password_confirm",
         ]
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return value
 
     def validate(self, attrs):
         if attrs["password"] != attrs.pop("password_confirm"):
@@ -53,3 +58,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         data["user"] = UserSerializer(self.user).data
         return data
+
+
+class LoginHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoginHistory
+        fields = ["id", "email_attempted", "status", "ip_address", "user_agent", "timestamp"]

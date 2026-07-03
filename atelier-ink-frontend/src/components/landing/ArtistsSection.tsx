@@ -7,34 +7,34 @@ import { Instagram, ArrowRight, User } from 'lucide-react'
 import { studioApi } from '@/lib/api'
 import type { ArtistList } from '@/types'
 
-// Fallback artists for when backend isn't connected
+// Nigerian artists — fallback when backend isn't connected
 const FALLBACK_ARTISTS: ArtistList[] = [
   {
     id: 1,
-    full_name: 'Maya Rivera',
-    bio: 'Specializing in fine line botanical work and delicate single-needle portraiture. 8 years of experience bringing quiet, detailed narratives to life.',
-    specialty_names: ['Fine Line', 'Botanical', 'Single Needle'],
-    avatar_url: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80',
+    full_name: 'Adaeze Okonkwo',
+    bio: 'Lagos-based fine line artist specialising in Afrocentric motifs, botanicals, and abstract geometry. 7 years of experience bringing intentional, lasting work to dark and light skin tones.',
+    specialty_names: ['Fine Line', 'Afrocentric', 'Botanical'],
+    avatar_url: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=80',
     is_accepting_clients: true,
-    years_experience: 8,
+    years_experience: 7,
   },
   {
     id: 2,
-    full_name: 'Kai Chen',
-    bio: 'Black & grey realism with a focus on portraiture and nature studies. Every piece is a collaboration — your vision, my hand.',
-    specialty_names: ['Realism', 'Black & Grey', 'Portraiture'],
-    avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400&q=80',
+    full_name: 'Emeka Nwosu',
+    bio: 'Neo-traditional and blackwork specialist. Draws heavy inspiration from Igbo uli patterns and Yoruba adire textile art. Each piece is a conversation between heritage and modern tattooing.',
+    specialty_names: ['Blackwork', 'Neo-Traditional', 'Uli Patterns'],
+    avatar_url: 'https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=400&q=80',
     is_accepting_clients: true,
-    years_experience: 6,
+    years_experience: 9,
   },
   {
     id: 3,
-    full_name: 'Jordan Osei',
-    bio: 'Neo-traditional and geometric blackwork. Complex compositions rendered with precision — built to age beautifully.',
-    specialty_names: ['Neo-Traditional', 'Geometric', 'Blackwork'],
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+    full_name: 'Zainab Bello',
+    bio: 'Piercing specialist and minimalist tattoo artist from Abuja, now based in Lagos. Trained in London. Known for clean, precise piercings and delicate micro-scripts.',
+    specialty_names: ['Piercing', 'Micro-Script', 'Minimalist'],
+    avatar_url: 'https://images.unsplash.com/photo-1523824921871-d6f1a15151f1?w=400&q=80',
     is_accepting_clients: false,
-    years_experience: 10,
+    years_experience: 5,
   },
 ]
 

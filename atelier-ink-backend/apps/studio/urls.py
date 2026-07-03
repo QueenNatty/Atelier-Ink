@@ -8,6 +8,4 @@ router.register("artists", ArtistViewSet, basename="artist")
 router.register("working-hours", WorkingHoursViewSet, basename="working-hours")
 router.register("portfolio", ArtistPortfolioViewSet, basename="portfolio")
 
-urlpatterns = [
-    path("", include(router.urls)),
-]
+urlpatterns = [path("", include(router.urls))]

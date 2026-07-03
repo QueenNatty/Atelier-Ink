@@ -23,17 +23,9 @@ class WorkingHoursSerializer(serializers.ModelSerializer):
 
 
 class ArtistPortfolioSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
-
     class Meta:
         model = ArtistPortfolio
         fields = ["id", "image_url", "caption", "service", "is_featured", "uploaded_at"]
-
-    def get_image_url(self, obj):
-        request = self.context.get("request")
-        if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
-        return None
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -41,7 +33,6 @@ class ArtistSerializer(serializers.ModelSerializer):
     specialties = ServiceSerializer(many=True, read_only=True)
     working_hours = WorkingHoursSerializer(many=True, read_only=True)
     portfolio_images = ArtistPortfolioSerializer(many=True, read_only=True)
-    avatar_url = serializers.SerializerMethodField()
     specialty_ids = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Service.objects.all(),
         write_only=True, source="specialties", required=False,
@@ -51,24 +42,16 @@ class ArtistSerializer(serializers.ModelSerializer):
         model = Artist
         fields = [
             "id", "user", "bio", "specialties", "specialty_ids",
-            "instagram_handle", "avatar", "avatar_url",
+            "instagram_handle", "avatar_url",
             "is_accepting_clients", "years_experience",
             "working_hours", "portfolio_images",
         ]
         read_only_fields = ["id"]
 
-    def get_avatar_url(self, obj):
-        request = self.context.get("request")
-        if obj.avatar and request:
-            return request.build_absolute_uri(obj.avatar.url)
-        return None
-
 
 class ArtistListSerializer(serializers.ModelSerializer):
-    """Lighter serializer used in list views."""
     full_name = serializers.CharField(source="user.full_name", read_only=True)
     specialty_names = serializers.SerializerMethodField()
-    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Artist
@@ -79,9 +62,3 @@ class ArtistListSerializer(serializers.ModelSerializer):
 
     def get_specialty_names(self, obj):
         return [s.name for s in obj.specialties.filter(is_active=True)]
-
-    def get_avatar_url(self, obj):
-        request = self.context.get("request")
-        if obj.avatar and request:
-            return request.build_absolute_uri(obj.avatar.url)
-        return None

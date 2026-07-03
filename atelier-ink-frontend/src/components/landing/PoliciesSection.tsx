@@ -73,8 +73,8 @@ export default function PoliciesSection() {
           By completing your booking, you agree to these policies in full.
           Deposits are processed securely and confirm your appointment slot.
           Questions? Email us at{' '}
-          <a href="mailto:hello@atelierink.com" className="text-gold hover:underline">
-            hello@atelierink.com
+          <a href="mailto:hello@atelierink.ng" className="text-gold hover:underline">
+            hello@atelierink.ng
           </a>
         </p>
       </div>

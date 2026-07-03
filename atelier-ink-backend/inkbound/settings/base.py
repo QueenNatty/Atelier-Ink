@@ -1,7 +1,3 @@
-"""
-Base settings for Inkbound Tattoo & Piercing Studio backend.
-Environment-specific settings inherit from this file.
-"""
 from datetime import timedelta
 from pathlib import Path
 from decouple import config
@@ -17,16 +13,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Third-party
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "django_filters",
-    # Local apps
     "apps.accounts",
     "apps.studio",
     "apps.bookings",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -42,25 +37,19 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "inkbound.urls"
 
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
+TEMPLATES = [{
+    "BACKEND": "django.template.backends.django.DjangoTemplates",
+    "DIRS": [],
+    "APP_DIRS": True,
+    "OPTIONS": {"context_processors": [
+        "django.template.context_processors.debug",
+        "django.template.context_processors.request",
+        "django.contrib.auth.context_processors.auth",
+        "django.contrib.messages.context_processors.messages",
+    ]},
+}]
 
 WSGI_APPLICATION = "inkbound.wsgi.application"
-ASGI_APPLICATION = "inkbound.asgi.application"
-
 AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -71,19 +60,16 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Lagos"
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ─── Django REST Framework ───────────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -98,22 +84,17 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
-    "DEFAULT_RENDERER_CLASSES": (
-        "rest_framework.renderers.JSONRenderer",
-    ),
 }
 
-# ─── JWT ─────────────────────────────────────────────────────────────────────
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=config("ACCESS_TOKEN_LIFETIME_MINUTES", default=60, cast=int)
-    ),
-    "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=config("REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)
-    ),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=config("ACCESS_TOKEN_LIFETIME_MINUTES", default=60, cast=int)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=config("REFRESH_TOKEN_LIFETIME_DAYS", default=7, cast=int)),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
 }
+
+# Paystack — keys loaded from .env
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY", default="sk_test_placeholder")
+PAYSTACK_PUBLIC_KEY = config("PAYSTACK_PUBLIC_KEY", default="pk_test_placeholder")
+PAYSTACK_CALLBACK_URL = config("PAYSTACK_CALLBACK_URL", default="http://localhost:3000/book/payment-callback")

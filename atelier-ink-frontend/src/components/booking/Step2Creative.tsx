@@ -9,12 +9,12 @@ import { cn } from '@/lib/utils'
 
 // Flash designs - in production these come from the backend
 const FLASH_DESIGNS = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=300&q=80', name: 'Moth & Moon', style: 'Fine Line' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1618088129969-bcb0c051985e?w=300&q=80', name: 'Snake Rose', style: 'Neo-Traditional' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1590159983013-d4b93f2459d3?w=300&q=80', name: 'Geometric Eye', style: 'Blackwork' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1611001897293-9c3b700b8f81?w=300&q=80', name: 'Floral Script', style: 'Fine Line' },
-  { id: 5, url: 'https://images.unsplash.com/photo-1598967402900-c9b2b8fef5dc?w=300&q=80', name: 'Dagger Heart', style: 'Traditional' },
-  { id: 6, url: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=300&q=80', name: 'Minimal Wave', style: 'Single Needle' },
+  { id: 1, url: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=300&q=80', name: 'Uli Vine', style: 'Fine Line' },
+  { id: 2, url: 'https://images.unsplash.com/photo-1542361345-89e58247f2d5?w=300&q=80', name: 'Adire Pattern', style: 'Neo-Traditional' },
+  { id: 3, url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&q=80', name: 'Nsibidi Script', style: 'Blackwork' },
+  { id: 4, url: 'https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?w=300&q=80', name: 'Lagos Bloom', style: 'Fine Line' },
+  { id: 5, url: 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=300&q=80', name: 'Kente Sleeve', style: 'Traditional' },
+  { id: 6, url: 'https://images.unsplash.com/photo-1611091057873-e1a7bf78b63f?w=300&q=80', name: 'Minimalist Ankh', style: 'Single Needle' },
 ]
 
 export default function Step2Creative() {
@@ -56,10 +56,9 @@ export default function Step2Creative() {
 
   const canProceed =
     (tattooPath === 'flash' && flashDesignId !== null) ||
-    (tattooPath === 'custom' && customPlacement.length > 0 )
-      
-      
-    return (
+    (tattooPath === 'custom' && customPlacement.length > 0)
+
+  return (
     <div>
       <p className="section-label mb-3">Step 2</p>
       <h2 className="display-heading text-4xl text-ink-white mb-2">Your Design</h2>
@@ -147,10 +146,10 @@ export default function Step2Creative() {
             </label>
             <input
               type="text"
-              placeholder="e.g. 3in * 2in or fist-sized"
-            value={customDimensions}
-            onChange={(e) => setCustomDimensions(e.target.value)}
-            className="input-ink"
+              placeholder="e.g. 3in x 2in or fist-sized"
+              value={customDimensions}
+              onChange={(e) => setCustomDimensions(e.target.value)}
+              className="input-ink"
             />
           </div>
 

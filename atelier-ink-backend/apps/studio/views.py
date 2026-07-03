@@ -1,18 +1,14 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Service, Artist, WorkingHours, ArtistPortfolio
 from .serializers import (
-    ServiceSerializer,
-    ArtistSerializer,
-    ArtistListSerializer,
-    WorkingHoursSerializer,
-    ArtistPortfolioSerializer,
+    ServiceSerializer, ArtistSerializer,
+    ArtistListSerializer, WorkingHoursSerializer, ArtistPortfolioSerializer,
 )
 from apps.accounts.permissions import IsAdminOrReadOnly, IsArtistOwnerOrAdmin
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
-    """CRUD for services. Public read, admin write."""
     queryset = Service.objects.filter(is_active=True)
     serializer_class = ServiceSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -22,10 +18,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
 
 
 class ArtistViewSet(viewsets.ModelViewSet):
-    """
-    list/retrieve: public
-    create/update/delete: admin only
-    """
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["is_accepting_clients"]
@@ -43,7 +35,6 @@ class ArtistViewSet(viewsets.ModelViewSet):
 
 
 class WorkingHoursViewSet(viewsets.ModelViewSet):
-    """Manage an artist's regular weekly schedule."""
     serializer_class = WorkingHoursSerializer
     permission_classes = [IsArtistOwnerOrAdmin]
 
@@ -55,7 +46,6 @@ class WorkingHoursViewSet(viewsets.ModelViewSet):
 
 
 class ArtistPortfolioViewSet(viewsets.ModelViewSet):
-    """Portfolio images — artists manage their own, admins manage all."""
     serializer_class = ArtistPortfolioSerializer
     permission_classes = [IsArtistOwnerOrAdmin]
 
