@@ -19,7 +19,7 @@
           <th>Email</th>
           <th>Specialties</th>
           <th>Experience</th>
-          <th>Accepting clients</th>
+          <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -32,19 +32,20 @@
             <td>{{ artist.years_experience }} yrs</td>
             <td>
               {% if artist.is_accepting_clients %}
-                <span class="badge available">Yes</span>
+                <span class="badge available">Accepting</span>
               {% else %}
-                <span class="badge cancelled">No</span>
+                <span class="badge cancelled">Waitlist</span>
               {% endif %}
             </td>
             <td>
               <div class="btn-row">
+                <!-- Toggle always visible regardless of current status -->
                 <form method="post" style="display:inline;">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="toggle_availability">
                   <input type="hidden" name="artist_id" value="{{ artist.pk }}">
                   <button type="submit" class="btn btn-ghost btn-sm">
-                    {% if artist.is_accepting_clients %}Pause{% else %}Activate{% endif %}
+                    {% if artist.is_accepting_clients %}Move to waitlist{% else %}Activate{% endif %}
                   </button>
                 </form>
                 <form method="post" style="display:inline;"
@@ -93,7 +94,7 @@
           <input type="text" name="phone" placeholder="+234 800 000 0000">
         </div>
         <div class="field">
-          <label>Password * (artist will use this to log in)</label>
+          <label>Password * (artist uses this to log in)</label>
           <input type="password" name="password" required minlength="8" placeholder="Min. 8 characters">
         </div>
         <div class="field">

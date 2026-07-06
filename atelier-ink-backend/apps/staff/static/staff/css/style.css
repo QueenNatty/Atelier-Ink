@@ -438,3 +438,44 @@ tr.clickable { transition: background .1s; }
 }
 
 .main-site-link:hover { color: var(--bone); }
+
+/* ---------- studio home link (brand area as link) ---------- */
+.studio-home-link {
+  display: block;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+  transition: background .15s;
+}
+
+.studio-home-link:hover { background: var(--ink-soft); }
+
+.studio-home-link .brand {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.studio-home-link .sub {
+  color: #b5482f;
+  font-size: 10px;
+}
+
+/* ---------- foot links ---------- */
+.foot-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.main-site-link {
+  display: inline-block;
+  font-size: 12px;
+  color: #b5482f;
+  font-weight: 600;
+  letter-spacing: .03em;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.main-site-link:hover { color: #ff9d81; }

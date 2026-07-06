@@ -11,10 +11,12 @@
 
   <div class="wrap">
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="mark">Atelier Ink</div>
-        <div class="sub">Studio Panel · Lagos</div>
-      </div>
+      <a href="http://localhost:3000" class="studio-home-link">
+        <div class="brand">
+          <div class="mark">Atelier Ink</div>
+          <div class="sub">↗ Visit main website</div>
+        </div>
+      </a>
 
       <nav class="nav">
         <a href="{% url 'staff:overview' %}" class="{% if request.resolver_match.url_name == 'overview' %}active{% endif %}">
@@ -53,8 +55,10 @@
           <div class="name">{{ request.user.full_name }}</div>
           <span class="role">{{ request.user.get_role_display }}</span>
         </div>
-        <a href="{% url 'staff:logout' %}" class="logout-link">Sign out</a>
-        <a href="http://localhost:3000" class="main-site-link">← Back to main website</a>
+        <div class="foot-links">
+          <a href="{% url 'staff:logout' %}" class="logout-link">Sign out</a>
+          <a href="http://localhost:3000" class="main-site-link">← Main website</a>
+        </div>
       </div>
     </aside>
 
