@@ -4,8 +4,11 @@
   <div class="page-head">
     <div>
       <h1>Artists</h1>
-      <p class="lede">Every artist profile on the platform.</p>
+      <p class="lede">Manage resident artists — toggle availability, add or remove profiles.</p>
     </div>
+    <button class="btn btn-primary btn-sm" onclick="document.getElementById('add-artist-modal').style.display='flex'">
+      + Add Artist
+    </button>
   </div>
 
   <div class="card" style="padding:0;">
@@ -17,13 +20,13 @@
           <th>Specialties</th>
           <th>Experience</th>
           <th>Accepting clients</th>
-          <th></th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for artist in artists %}
           <tr>
-            <td>{{ artist.user.full_name }}</td>
+            <td><strong>{{ artist.user.full_name }}</strong></td>
             <td>{{ artist.user.email }}</td>
             <td>{% for s in artist.specialties.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
             <td>{{ artist.years_experience }} yrs</td>
@@ -35,19 +38,84 @@
               {% endif %}
             </td>
             <td>
-              <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="artist_id" value="{{ artist.pk }}">
-                <button type="submit" class="btn btn-ghost btn-sm">
-                  {% if artist.is_accepting_clients %}Pause bookings{% else %}Resume bookings{% endif %}
-                </button>
-              </form>
+              <div class="btn-row">
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle_availability">
+                  <input type="hidden" name="artist_id" value="{{ artist.pk }}">
+                  <button type="submit" class="btn btn-ghost btn-sm">
+                    {% if artist.is_accepting_clients %}Pause{% else %}Activate{% endif %}
+                  </button>
+                </form>
+                <form method="post" style="display:inline;"
+                  onsubmit="return confirm('Delete {{ artist.user.full_name }}? This cannot be undone.');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete_artist">
+                  <input type="hidden" name="artist_id" value="{{ artist.pk }}">
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+              </div>
             </td>
           </tr>
         {% empty %}
-          <tr class="empty-row"><td colspan="6">No artists yet.</td></tr>
+          <tr class="empty-row"><td colspan="6">No artists yet. Add one above.</td></tr>
         {% endfor %}
       </tbody>
     </table>
+  </div>
+
+  <!-- Add Artist Modal -->
+  <div id="add-artist-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>Add New Artist</h2>
+        <button onclick="document.getElementById('add-artist-modal').style.display='none'" class="modal-close">&times;</button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_artist">
+        <div class="form-grid">
+          <div class="field">
+            <label>First Name *</label>
+            <input type="text" name="first_name" required placeholder="Adaeze">
+          </div>
+          <div class="field">
+            <label>Last Name *</label>
+            <input type="text" name="last_name" required placeholder="Okonkwo">
+          </div>
+        </div>
+        <div class="field">
+          <label>Email *</label>
+          <input type="email" name="email" required placeholder="artist@atelierink.ng">
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="text" name="phone" placeholder="+234 800 000 0000">
+        </div>
+        <div class="field">
+          <label>Password * (artist will use this to log in)</label>
+          <input type="password" name="password" required minlength="8" placeholder="Min. 8 characters">
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea name="bio" rows="3" placeholder="Short artist bio…"></textarea>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Years Experience</label>
+            <input type="number" name="years_experience" min="0" max="50" value="1">
+          </div>
+          <div class="field">
+            <label>Instagram handle</label>
+            <input type="text" name="instagram_handle" placeholder="@artist.ink">
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button type="submit" class="btn btn-primary">Create Artist</button>
+          <button type="button" onclick="document.getElementById('add-artist-modal').style.display='none'"
+            class="btn btn-ghost">Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}

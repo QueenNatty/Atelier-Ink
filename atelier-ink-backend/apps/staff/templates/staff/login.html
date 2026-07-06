@@ -3,39 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Studio Login · Atelier Ink</title>
+  <title>Studio Login · Atelier Ink Lagos</title>
   <link rel="stylesheet" href="{% static 'staff/css/style.css' %}">
 </head>
 <body>
   <div class="login-page">
     <div class="login-box">
-      <div class="mark">Atelier <em class="accent">Ink</em></div>
-      <div class="sub">Lagos Studio</div>
+      <div class="mark">Atelier Ink</div>
+      <div class="sub">Studio Panel · Lagos</div>
 
-      <div class="panel">
-        <p class="eyebrow">Studio Panel</p>
-        <h1>Sign In</h1>
-
-        {% if form.non_field_errors %}
-          <div class="form-error">{{ form.non_field_errors.0 }}</div>
-        {% endif %}
-
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ next }}">
-          <div class="field">
-            <label for="id_email">Email Address</label>
-            {{ form.email }}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="form-error" style="{% if 'success' in message.tags %}background:#e5f0e7;color:#3d7a4f;{% endif %}">
+            {{ message }}
           </div>
-          <div class="field">
-            <label for="id_password">Password</label>
-            {{ form.password }}
-          </div>
-          <button type="submit" class="btn btn-accent">Sign In</button>
-        </form>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="form-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="field">
+          <label for="id_email">Email</label>
+          {{ form.email }}
+        </div>
+        <div class="field">
+          <label for="id_password">Password</label>
+          {{ form.password }}
+        </div>
+        <button type="submit" class="btn btn-accent">Sign in to Studio</button>
+      </form>
+
+      <div class="login-footer">
+        <p class="muted" style="margin:0;">Staff and artist accounts only.</p>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:12px;">
+          <a href="http://localhost:3000" class="back-link">← Back to Atelier Ink website</a>
+          <a href="http://localhost:3000/login" class="back-link">Sign in as a client instead</a>
+        </div>
       </div>
-
-      <p class="footnote">Staff and artist accounts only</p>
     </div>
   </div>
 </body>

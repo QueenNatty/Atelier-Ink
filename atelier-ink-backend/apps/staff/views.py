@@ -31,7 +31,7 @@ def staff_login(request):
 @staff_required
 def staff_logout(request):
     auth_logout(request)
-    messages.success(request, "You've been logged out.")
+    # Redirect to login page — back links to main site are visible there
     return redirect("staff:login")
 
 
@@ -235,10 +235,46 @@ def session_blocks(request):
 @admin_required
 def artists_list(request):
     if request.method == "POST":
-        artist = get_object_or_404(Artist, pk=request.POST.get("artist_id"))
-        artist.is_accepting_clients = not artist.is_accepting_clients
-        artist.save(update_fields=["is_accepting_clients"])
-        messages.success(request, f"Updated availability for {artist.user.full_name}.")
+        action = request.POST.get("action")
+
+        if action == "toggle_availability":
+            artist = get_object_or_404(Artist, pk=request.POST.get("artist_id"))
+            artist.is_accepting_clients = not artist.is_accepting_clients
+            artist.save(update_fields=["is_accepting_clients"])
+            status = "activated" if artist.is_accepting_clients else "paused"
+            messages.success(request, f"{artist.user.full_name} has been {status}.")
+
+        elif action == "delete_artist":
+            artist = get_object_or_404(Artist, pk=request.POST.get("artist_id"))
+            name = artist.user.full_name
+            user = artist.user
+            artist.delete()
+            user.delete()
+            messages.success(request, f"Artist {name} has been removed.")
+
+        elif action == "add_artist":
+            from apps.accounts.models import User
+            email = request.POST.get("email", "").strip()
+            if User.objects.filter(email__iexact=email).exists():
+                messages.error(request, f"An account with email {email} already exists.")
+            else:
+                new_user = User.objects.create_user(
+                    email=email,
+                    password=request.POST.get("password"),
+                    first_name=request.POST.get("first_name", "").strip(),
+                    last_name=request.POST.get("last_name", "").strip(),
+                    phone=request.POST.get("phone", "").strip(),
+                    role=User.Role.ARTIST,
+                )
+                Artist.objects.create(
+                    user=new_user,
+                    bio=request.POST.get("bio", "").strip(),
+                    years_experience=int(request.POST.get("years_experience", 1) or 1),
+                    instagram_handle=request.POST.get("instagram_handle", "").strip(),
+                    is_accepting_clients=True,
+                )
+                messages.success(request, f"Artist {new_user.full_name} has been added.")
+
         return redirect("staff:artists")
 
     artists = Artist.objects.select_related("user").prefetch_related("specialties")
