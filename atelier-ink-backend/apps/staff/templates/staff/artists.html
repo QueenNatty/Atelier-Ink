@@ -1,0 +1,53 @@
+{% extends "staff/base.html" %}
+{% block title %}Artists{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Artists</h1>
+      <p class="lede">Every artist profile on the platform.</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Specialties</th>
+          <th>Experience</th>
+          <th>Accepting clients</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for artist in artists %}
+          <tr>
+            <td>{{ artist.user.full_name }}</td>
+            <td>{{ artist.user.email }}</td>
+            <td>{% for s in artist.specialties.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+            <td>{{ artist.years_experience }} yrs</td>
+            <td>
+              {% if artist.is_accepting_clients %}
+                <span class="badge available">Yes</span>
+              {% else %}
+                <span class="badge cancelled">No</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="artist_id" value="{{ artist.pk }}">
+                <button type="submit" class="btn btn-ghost btn-sm">
+                  {% if artist.is_accepting_clients %}Pause bookings{% else %}Resume bookings{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="6">No artists yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "staff/base.html" %}
+{% block title %}Services{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Services</h1>
+      <p class="lede">What clients can book.</p>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="card" style="padding:0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Base price</th>
+            <th>Active</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for service in services %}
+            <tr>
+              <td>{{ service.name }}</td>
+              <td>{{ service.get_category_display }}</td>
+              <td>₦{{ service.base_price }}</td>
+              <td>
+                {% if service.is_active %}
+                  <span class="badge available">Active</span>
+                {% else %}
+                  <span class="badge cancelled">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle">
+                  <input type="hidden" name="service_id" value="{{ service.pk }}">
+                  <button type="submit" class="btn btn-ghost btn-sm">
+                    {% if service.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr class="empty-row"><td colspan="5">No services yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Add a service</h2>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="field {% if field.name == 'is_active' %}checkbox-field{% endif %}">
+            {% if field.name == 'is_active' %}
+              {{ field }} <label style="margin:0;">{{ field.label }}</label>
+            {% else %}
+              <label>{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Add service</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

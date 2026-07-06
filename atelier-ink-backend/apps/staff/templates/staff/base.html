@@ -1,0 +1,56 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Studio Panel{% endblock %} · Atelier Ink</title>
+  <link rel="stylesheet" href="{% static 'staff/css/style.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">Atelier <em class="accent">Ink</em></div>
+        <div class="sub">Studio Panel</div>
+      </div>
+
+      <nav class="nav">
+        <a href="{% url 'staff:overview' %}" class="{% if request.resolver_match.url_name == 'overview' %}active{% endif %}">Overview</a>
+        <a href="{% url 'staff:booking-list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}">Bookings</a>
+
+        <div class="section-label">Schedule</div>
+        <a href="{% url 'staff:consultation-slots' %}" class="{% if request.resolver_match.url_name == 'consultation-slots' %}active{% endif %}">Consultation slots</a>
+        <a href="{% url 'staff:session-blocks' %}" class="{% if request.resolver_match.url_name == 'session-blocks' %}active{% endif %}">Session blocks</a>
+
+        {% if request.user.is_admin_user %}
+        <div class="section-label">Studio</div>
+        <a href="{% url 'staff:artists' %}" class="{% if request.resolver_match.url_name == 'artists' %}active{% endif %}">Artists</a>
+        <a href="{% url 'staff:services' %}" class="{% if request.resolver_match.url_name == 'services' %}active{% endif %}">Services</a>
+        {% endif %}
+
+        <div class="section-label">Account</div>
+        <a href="{% url 'staff:login-history' %}" class="{% if request.resolver_match.url_name == 'login-history' %}active{% endif %}">Login history</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user-chip">
+          <div class="name">{{ request.user.full_name }}</div>
+          <span class="role">{{ request.user.get_role_display }}</span>
+        </div>
+        <a href="{% url 'staff:logout' %}" class="logout-link">Log out</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="msg {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

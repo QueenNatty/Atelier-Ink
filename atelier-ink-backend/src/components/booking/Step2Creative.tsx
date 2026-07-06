@@ -8,6 +8,15 @@ import SmartImage from '@/components/ui/SmartImage'
 import { useWizardStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
+// Flash designs - in production these come from the backend
+const FLASH_DESIGNS = [
+  { id: 1, url: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=300&q=80', name: 'Uli Vine', style: 'Fine Line' },
+  { id: 2, url: 'https://images.unsplash.com/photo-1542361345-89e58247f2d5?w=300&q=80', name: 'Adire Pattern', style: 'Neo-Traditional' },
+  { id: 3, url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&q=80', name: 'Nsibidi Script', style: 'Blackwork' },
+  { id: 4, url: 'https://images.unsplash.com/photo-1568515387631-8b650bbcdb90?w=300&q=80', name: 'Lagos Bloom', style: 'Fine Line' },
+  { id: 5, url: 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=300&q=80', name: 'Kente Sleeve', style: 'Traditional' },
+  { id: 6, url: 'https://images.unsplash.com/photo-1611091057873-e1a7bf78b63f?w=300&q=80', name: 'Minimalist Ankh', style: 'Single Needle' },
+]
 
 export default function Step2Creative() {
   const {

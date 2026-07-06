@@ -1,0 +1,99 @@
+{% extends "staff/base.html" %}
+{% block title %}Booking #{{ booking.pk }}{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Booking #{{ booking.pk }}</h1>
+      <p class="lede">{{ booking.client.full_name }} · {{ booking.get_booking_type_display }} · <span class="badge {{ booking.status }}">{{ booking.get_status_display }}</span></p>
+    </div>
+    <a href="{% url 'staff:booking-list' %}" class="btn btn-ghost btn-sm">← Back to bookings</a>
+  </div>
+
+  <div class="detail-grid">
+    <div>
+      <div class="card">
+        <h2>Details</h2>
+        <dl class="kv">
+          <dt>Client</dt><dd>{{ booking.client.full_name }} · {{ booking.client.email }}{% if booking.client.phone %} · {{ booking.client.phone }}{% endif %}</dd>
+          <dt>Artist</dt><dd>{{ booking.artist.user.full_name }}</dd>
+          <dt>Service</dt><dd>{{ booking.service.name|default:"—" }}</dd>
+          <dt>Placement</dt><dd>{{ booking.placement|default:"—" }}</dd>
+          <dt>Description</dt><dd>{{ booking.description|default:"—"|linebreaksbr }}</dd>
+          {% if booking.booking_type == "consultation" and booking.consultation_slot %}
+            <dt>Consultation slot</dt><dd>{{ booking.consultation_slot.date }} · {{ booking.consultation_slot.start_time|time:"H:i" }}–{{ booking.consultation_slot.end_time|time:"H:i" }}</dd>
+          {% endif %}
+          {% if booking.booking_type == "session" %}
+            <dt>Session date</dt><dd>{{ booking.session_date|default:"—" }}{% if booking.session_start_time %} · {{ booking.session_start_time|time:"H:i" }}{% endif %}</dd>
+            <dt>Hours booked</dt><dd>{{ booking.session_hours|default:"—" }}</dd>
+          {% endif %}
+          <dt>Quoted price</dt><dd>{% if booking.quoted_price %}₦{{ booking.quoted_price }}{% else %}—{% endif %}</dd>
+          <dt>Deposit</dt><dd>₦{{ booking.deposit_amount }} · {% if booking.deposit_paid %}Paid{% else %}Not paid{% endif %}</dd>
+          {% if booking.cancellation_reason %}
+            <dt>Cancellation reason</dt><dd>{{ booking.cancellation_reason }}</dd>
+          {% endif %}
+          <dt>Created</dt><dd>{{ booking.created_at|date:"M j, Y, g:i a" }}</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h2>Artist notes</h2>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save_notes">
+          <div class="field">
+            <textarea name="artist_notes" rows="4" placeholder="Private notes about this booking…">{{ booking.artist_notes }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-ghost btn-sm">Save notes</button>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Actions</h2>
+
+        {% if booking.status == "pending" %}
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="confirm">
+            <button type="submit" class="btn btn-primary btn-sm">Confirm booking</button>
+          </form>
+        {% endif %}
+
+        {% if not booking.deposit_paid and booking.status != "cancelled" %}
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mark_deposit_paid">
+            <button type="submit" class="btn btn-ghost btn-sm">Mark deposit paid</button>
+          </form>
+        {% endif %}
+
+        {% if booking.status != "completed" and booking.status != "cancelled" and booking.status != "no_show" %}
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="complete">
+            <button type="submit" class="btn btn-ghost btn-sm">Mark completed</button>
+          </form>
+
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="no_show">
+            <button type="submit" class="btn btn-ghost btn-sm">Mark no-show</button>
+          </form>
+        {% endif %}
+
+        {% if booking.status != "completed" and booking.status != "cancelled" %}
+          <form method="post" style="margin-top:14px; border-top:1px solid var(--line-light); padding-top:14px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="cancel">
+            <div class="field">
+              <label>Cancellation reason (optional)</label>
+              <textarea name="cancellation_reason" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this booking?');">Cancel booking</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

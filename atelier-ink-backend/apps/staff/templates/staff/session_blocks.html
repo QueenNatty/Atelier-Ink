@@ -1,0 +1,67 @@
+{% extends "staff/base.html" %}
+{% block title %}Session blocks{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Session blocks</h1>
+      <p class="lede">Blocks of time open for tattoo/piercing sessions.</p>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="card" style="padding:0;">
+      <table>
+        <thead>
+          <tr>
+            {% if request.user.is_admin_user %}<th>Artist</th>{% endif %}
+            <th>Date</th>
+            <th>Time</th>
+            <th>Service</th>
+            <th>Hours</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for block in blocks %}
+            <tr>
+              {% if request.user.is_admin_user %}<td>{{ block.artist.user.full_name }}</td>{% endif %}
+              <td>{{ block.date }}</td>
+              <td>{{ block.start_time|time:"H:i" }}–{{ block.end_time|time:"H:i" }}</td>
+              <td>{{ block.service.name|default:"—" }}</td>
+              <td>{{ block.booked_hours }} / {{ block.total_hours }}</td>
+              <td><span class="badge {{ block.status }}">{{ block.get_status_display }}</span></td>
+              <td>
+                {% if block.status != "cancelled" %}
+                  <form method="post" onsubmit="return confirm('Cancel this session block?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel">
+                    <input type="hidden" name="block_id" value="{{ block.pk }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr class="empty-row"><td colspan="7">No upcoming session blocks.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Add a session block</h2>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="field">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Add block</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "staff/base.html" %}
+{% block title %}Login history{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Login history</h1>
+      <p class="lede">{% if request.user.is_admin_user %}All login attempts across the platform.{% else %}Your recent login attempts.{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;">
+    <table>
+      <thead>
+        <tr>
+          {% if request.user.is_admin_user %}<th>User</th>{% endif %}
+          <th>Email attempted</th>
+          <th>Status</th>
+          <th>IP address</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+          <tr>
+            {% if request.user.is_admin_user %}<td>{{ entry.user.full_name|default:"—" }}</td>{% endif %}
+            <td>{{ entry.email_attempted }}</td>
+            <td><span class="badge {{ entry.status }}">{{ entry.get_status_display }}</span></td>
+            <td>{{ entry.ip_address|default:"—" }}</td>
+            <td>{{ entry.timestamp|date:"M j, Y, g:i a" }}</td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="5">No login history yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

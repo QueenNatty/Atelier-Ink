@@ -1,0 +1,53 @@
+{% extends "staff/base.html" %}
+{% block title %}Bookings{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Bookings</h1>
+      <p class="lede">{{ bookings|length }} shown{% if current_status %} · filtered by {{ current_status }}{% endif %}</p>
+    </div>
+  </div>
+
+  <form method="get" class="filters">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" placeholder="Search client or placement…" value="{{ query }}">
+    <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
+    {% if current_status or query %}<a href="{% url 'staff:booking-list' %}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+  </form>
+
+  <div class="card" style="padding:0;">
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          {% if request.user.is_admin_user %}<th>Artist</th>{% endif %}
+          <th>Type</th>
+          <th>Placement</th>
+          <th>Status</th>
+          <th>Deposit</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+          <tr class="clickable" onclick="window.location='{% url 'staff:booking-detail' booking.pk %}'">
+            <td>{{ booking.client.full_name }}</td>
+            {% if request.user.is_admin_user %}<td>{{ booking.artist.user.full_name }}</td>{% endif %}
+            <td>{{ booking.get_booking_type_display }}</td>
+            <td>{{ booking.placement|default:"—" }}</td>
+            <td><span class="badge {{ booking.status }}">{{ booking.get_status_display }}</span></td>
+            <td>{% if booking.deposit_paid %}Paid{% else %}₦{{ booking.deposit_amount }}{% endif %}</td>
+            <td>{{ booking.created_at|date:"M j, Y" }}</td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="7">No bookings match your filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

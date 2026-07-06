@@ -1,0 +1,48 @@
+{% extends "staff/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1>Overview</h1>
+      <p class="lede">
+        {% if request.user.is_admin_user %}Studio-wide snapshot.{% else %}Your bookings and schedule at a glance.{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="num">{{ stats.total }}</div><div class="label">Total bookings</div></div>
+    <div class="stat-card"><div class="num">{{ stats.pending }}</div><div class="label">Pending</div></div>
+    <div class="stat-card"><div class="num">{{ stats.confirmed }}</div><div class="label">Confirmed</div></div>
+    <div class="stat-card"><div class="num">{{ stats.today_consultations }}</div><div class="label">Consults today</div></div>
+    <div class="stat-card"><div class="num">{{ stats.today_sessions }}</div><div class="label">Sessions today</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Recent bookings</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th>
+          {% if request.user.is_admin_user %}<th>Artist</th>{% endif %}
+          <th>Type</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in recent_bookings %}
+          <tr class="clickable" onclick="window.location='{% url 'staff:booking-detail' booking.pk %}'">
+            <td>{{ booking.client.full_name }}</td>
+            {% if request.user.is_admin_user %}<td>{{ booking.artist.user.full_name }}</td>{% endif %}
+            <td>{{ booking.get_booking_type_display }}</td>
+            <td><span class="badge {{ booking.status }}">{{ booking.get_status_display }}</span></td>
+            <td>{{ booking.created_at|date:"M j, Y" }}</td>
+          </tr>
+        {% empty %}
+          <tr class="empty-row"><td colspan="5">No bookings yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
