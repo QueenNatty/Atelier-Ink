@@ -49,8 +49,8 @@ export const PORTFOLIO_IMAGES = [
     id: 2,
     local: '/images/portfolio/2.jpg',
     fallback: 'https://images.unsplash.com/photo-1542361345-89e58247f2d5?w=800&q=80',
-    alt: 'Blackwork geometric chest piece',
-    tag: 'Blackwork',
+    alt: 'An eyebrow piercing',
+    tag: 'Eyebrow piercing',
     featured: false,
   },
   {
