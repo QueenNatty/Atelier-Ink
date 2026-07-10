@@ -15,11 +15,11 @@
 // ── Hero ─────────────────────────────────────────────────────────────────────
 export const HERO_BG =
   '/images/hero/studio-bg.jpg'                         // Replace with your studio/hero image
-  || 'https://images.unsplash.com/photo-1618520042988-b8bb74e6d653?w=1600&q=80'
+  // 'https://images.unsplash.com/photo-1618520042988-b8bb74e6d653?w=1600&q=80'
 
 export const CTA_BG =
   '/images/hero/cta-bg.jpg'                            // Bottom CTA section background (optional)
-  || 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=80'
+  // 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=80'
 
 // ── Artists ───────────────────────────────────────────────────────────────────
 // When you add a new artist via the staff portal, add their image here.

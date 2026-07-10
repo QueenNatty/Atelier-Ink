@@ -29,8 +29,12 @@ export default function Step3Schedule() {
     ]
 
     Promise.allSettled(fetches).then(([slotsRes, blocksRes]) => {
-      if (slotsRes.status === 'fulfilled') setSlots(slotsRes.value.data)
-      if (blocksRes.status === 'fulfilled') setBlocks(blocksRes.value.data)
+      if (slotsRes.status === 'fulfilled') {
+        setSlots((slotsRes as PromiseFulfilledResult<{data: ConsultationSlot[] }>).value.data )
+      }
+      if (blocksRes.status === 'fulfilled') {
+        setBlocks((blocksRes as PromiseFulfilledResult<{data: SessionBlock[] }>).value.data)
+      }
       setLoading(false)
     })
   }, [selectedArtist])
