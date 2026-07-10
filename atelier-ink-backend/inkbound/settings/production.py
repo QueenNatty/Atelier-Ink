@@ -15,7 +15,10 @@ DATABASES = {
     )
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+CORS_ALLOWED_ORIGINS =  [
+    os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
+    "https://atelier-ink.onrender.com"
+]
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
