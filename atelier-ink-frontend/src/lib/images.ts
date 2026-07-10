@@ -22,10 +22,14 @@ export const CTA_BG =
   || 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=80'
 
 // ── Artists ───────────────────────────────────────────────────────────────────
+// When you add a new artist via the staff portal, add their image here.
+// Key = first name in lowercase, value = path inside /public/images/artists/
+// Example: if you add "Chidi Eze", add:  chidi: '/images/artists/chidi.jpg'
 export const ARTIST_IMAGES: Record<string, string> = {
-  adaeze: '/images/artists/adaeze.jpg',                // Adaeze Okonkwo portrait
-  emeka:  '/images/artists/emeka.jpg',                 // Emeka Nwosu portrait
-  zainab: '/images/artists/zainab.jpg',                // Zainab Bello portrait
+  adaeze: '/images/artists/adaeze.jpg',
+  emeka:  '/images/artists/emeka.jpg',
+  zainab: '/images/artists/zainab.jpg',
+  // Add new artists below ↓
 }
 
 // Fallback Unsplash URLs used when local file doesn't exist yet
@@ -49,8 +53,8 @@ export const PORTFOLIO_IMAGES = [
     id: 2,
     local: '/images/portfolio/2.jpg',
     fallback: 'https://images.unsplash.com/photo-1542361345-89e58247f2d5?w=800&q=80',
-    alt: 'An eyebrow piercing',
-    tag: 'Eyebrow piercing',
+    alt: 'Blackwork geometric chest piece',
+    tag: 'Blackwork',
     featured: false,
   },
   {

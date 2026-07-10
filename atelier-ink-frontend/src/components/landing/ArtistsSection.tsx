@@ -25,44 +25,70 @@ const FALLBACK_ARTISTS: ArtistList[] = [
     id: 3, full_name: 'Zainab Bello',
     bio: 'Piercing specialist and minimalist tattoo artist. Trained in London, based in Lagos. Known for clean, precise piercings and delicate micro-scripts.',
     specialty_names: ['Piercing', 'Micro-Script', 'Minimalist'],
-    avatar_url: null, is_accepting_clients: false, years_experience: 5,
+    avatar_url: null, is_accepting_clients: true, years_experience: 5,
   },
 ]
 
-const ARTIST_KEY: Record<string, string> = {
+// Maps known artist names → local image keys in ARTIST_IMAGES
+const KNOWN_ARTISTS: Record<string, string> = {
   'Adaeze Okonkwo': 'adaeze',
   'Emeka Nwosu': 'emeka',
   'Zainab Bello': 'zainab',
 }
 
+function ArtistPhoto({ artist }: { artist: ArtistList }) {
+  const key = KNOWN_ARTISTS[artist.full_name]
+  const local = key ? ARTIST_IMAGES[key] : ''
+  const remote = artist.avatar_url || (key ? ARTIST_FALLBACKS[key] : '')
+
+  if (local || remote) {
+    return (
+      <SmartImage
+        local={local || remote}
+        fallback={remote || local}
+        alt={artist.full_name}
+        fill
+        className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+      />
+    )
+  }
+
+  // New artist added via staff portal with no photo yet — show initials
+  const initials = artist.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-ink-graphite">
+      <span className="font-display text-5xl font-light text-ink-smoke">{initials}</span>
+    </div>
+  )
+}
+
 export default function ArtistsSection() {
-  const [artists, setArtists] = useState<ArtistList[]>(FALLBACK_ARTISTS)
+  const [artists, setArtists] = useState<ArtistList[] | null>(null)
+  const [apiError, setApiError] = useState(false)
 
   useEffect(() => {
     studioApi.getArtists()
-      .then((res) => { if (res.data.length > 0) setArtists(res.data) })
-      .catch(() => {})
+      .then(res => setArtists(res.data.length > 0 ? res.data : FALLBACK_ARTISTS))
+      .catch(() => { setApiError(true); setArtists(FALLBACK_ARTISTS) })
   }, [])
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {artists.map((artist) => {
-        const key = ARTIST_KEY[artist.full_name] || 'adaeze'
-        const localImg = ARTIST_IMAGES[key]
-        const fallbackImg = artist.avatar_url || ARTIST_FALLBACKS[key]
+  const display = artists ?? FALLBACK_ARTISTS
 
-        return (
+  return (
+    <>
+      {apiError && (
+        <p className="font-body text-xs text-ink-ash mb-6 opacity-60">
+          Showing cached data — backend may be offline.
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {display.map(artist => (
           <div key={artist.id}
             className="card-ink group overflow-hidden flex flex-col transition-all duration-300 hover:border-ink-smoke hover:-translate-y-1">
-            {/* Photo */}
+
             <div className="relative h-72 overflow-hidden bg-ink-graphite flex-shrink-0">
-              <SmartImage
-                local={localImg}
-                fallback={fallbackImg}
-                alt={artist.full_name}
-                fill
-                className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-              />
+              <ArtistPhoto artist={artist} />
               <div className="absolute top-4 right-4">
                 <span className={`font-body text-2xs tracking-widest uppercase px-3 py-1 ${
                   artist.is_accepting_clients ? 'bg-gold text-ink-black' : 'bg-ink-steel text-ink-ash'
@@ -72,11 +98,12 @@ export default function ArtistsSection() {
               </div>
             </div>
 
-            {/* Info — flex-col with flex-1 so the button always sits at the bottom */}
             <div className="p-6 flex flex-col flex-1">
               <div className="mb-3">
                 <h3 className="font-display text-2xl font-light text-ink-white">{artist.full_name}</h3>
-                <p className="font-body text-xs text-ink-ash mt-1">{artist.years_experience} years experience · Lagos, NG</p>
+                <p className="font-body text-xs text-ink-ash mt-1">
+                  {artist.years_experience} years experience · Lagos, NG
+                </p>
               </div>
 
               <p className="font-body text-sm text-ink-silver leading-relaxed mb-4 flex-1 line-clamp-3">
@@ -84,15 +111,13 @@ export default function ArtistsSection() {
               </p>
 
               <div className="flex flex-wrap gap-2 mb-5">
-                {artist.specialty_names.slice(0, 3).map((s) => (
-                  <span key={s}
-                    className="font-body text-2xs tracking-widest uppercase text-gold border border-gold/30 px-2 py-1">
+                {artist.specialty_names.slice(0, 3).map(s => (
+                  <span key={s} className="font-body text-2xs tracking-widest uppercase text-gold border border-gold/30 px-2 py-1">
                     {s}
                   </span>
                 ))}
               </div>
 
-              {/* Button always at bottom, same line across all cards */}
               <div className="mt-auto pt-4 border-t border-ink-steel">
                 {artist.is_accepting_clients ? (
                   <Link href={`/book?artist=${artist.id}`}
@@ -108,8 +133,8 @@ export default function ArtistsSection() {
               </div>
             </div>
           </div>
-        )
-      })}
-    </div>
+        ))}
+      </div>
+    </>
   )
 }

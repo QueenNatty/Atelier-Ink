@@ -68,7 +68,10 @@ export const authApi = {
 // ── Studio endpoints ──────────────────────────────────────────────────────────
 export const studioApi = {
   getArtists: () =>
-    api.get<ArtistList[]>('/studio/artists/'),
+    api.get<ArtistList[]>('/studio/artists/', {
+      params: { _t: Date.now() },  // cache-bust so availability changes reflect immediately
+      headers: { 'Cache-Control': 'no-cache' },
+    }),
 
   getArtist: (id: number) =>
     api.get<Artist>(`/studio/artists/${id}/`),

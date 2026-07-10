@@ -1,116 +1,137 @@
-# Atelier Ink — Next.js Frontend
+# Atelier Ink — Tattoo & Piercing Studio Booking System
 
-Sleek, modern booking interface for the Atelier Ink tattoo & piercing studio.
-
-## Tech Stack
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **Tailwind CSS** with custom design tokens
-- **Zustand** for wizard state management
-- **Axios** for API communication
-- **react-dropzone** for file uploads
-- **date-fns** for date formatting
-- **Cormorant Garamond** (display) + **Inter** (body) typefaces
+> A full-stack web application built as a backend engineering course project for **SEN 310** at the **Federal University of Technology, Owerri (FUTO)**, Nigeria.
 
 ---
 
-## Quick Start
+## What is this?
 
+Atelier Ink is a booking platform for a fictional tattoo and piercing studio based in **Surulere, Lagos State**. It handles everything from client-facing booking flows to internal staff management — all tailored for a Nigerian context, with Paystack payment integration and Naira pricing throughout.
+
+The project was built to demonstrate real-world backend engineering concepts: custom authentication, role-based access control, REST API design, payment gateway integration, and session/audit logging.
+
+---
+
+## The Stack
+
+**Backend — Django**
+- Django 5 + Django REST Framework
+- JWT authentication via SimpleJWT (with token blacklisting on logout)
+- Custom User model with three roles: client, artist, admin
+- Login history tracking — every attempt recorded with IP and timestamp
+- Paystack payment integration for deposit collection in Naira
+- SQLite in development, PostgreSQL-ready for production
+- Separate staff portal (server-rendered Django views) for artists and admins
+
+**Frontend — Next.js**
+- Next.js 14 with the App Router
+- TypeScript throughout
+- Tailwind CSS with a custom dark design system
+- Zustand for booking wizard state management
+- Axios with automatic JWT refresh
+
+---
+
+## Project Structure
+
+```
+atelier-ink/
+├── atelier-ink-backend/
+│   ├── apps/
+│   │   ├── accounts/     — Custom user model, JWT auth, login history
+│   │   ├── studio/       — Artists, services, working hours
+│   │   ├── bookings/     — Consultation slots, session blocks, bookings
+│   │   ├── payments/     — Paystack integration, transaction records
+│   │   └── staff/        — Server-rendered admin/artist portal
+│   └── manage.py
+│
+└── atelier-ink-frontend/
+    ├── src/
+    │   ├── app/           — Pages (home, book, login, register, callback)
+    │   ├── components/    — Booking wizard, landing sections, UI
+    │   └── lib/           — API client, auth context, Zustand store
+    └── public/images/     — Drop your own photos here
+```
+
+---
+
+## Running Locally
+
+### Backend
 ```bash
-# 1. Install dependencies
+cd atelier-ink-backend
+python -m venv venv
+venv\Scripts\activate
+pip install django djangorestframework djangorestframework-simplejwt django-cors-headers django-filter python-decouple requests
+copy .env.example .env
+python manage.py makemigrations accounts studio bookings payments
+python manage.py migrate
+python manage.py seed_dev_data
+python manage.py runserver
+```
+
+### Frontend
+```bash
+cd atelier-ink-frontend
 npm install
-
-# 2. Create env file
-cp .env.local.example .env.local
-
-# 3. Start dev server (make sure Django backend is running first)
+copy .env.local.example .env.local
 npm run dev
 ```
 
-Frontend runs at **http://localhost:3000**
-Django backend must be running at **http://localhost:8000**
+---
+
+## Test Accounts
+
+| Role   | Email                  | Password      | Access                       |
+|--------|------------------------|---------------|------------------------------|
+| Admin  | admin@atelierink.ng    | admin123      | localhost:8000/staff/        |
+| Artist | adaeze@atelierink.ng   | atelierink123 | localhost:8000/staff/        |
+| Artist | emeka@atelierink.ng    | atelierink123 | localhost:8000/staff/        |
+| Client | register at /register  | your choice   | localhost:3000               |
 
 ---
 
-## Pages
-
-| Route   | Description                          |
-|---------|--------------------------------------|
-| `/`     | Studio landing page                  |
-| `/book` | 5-step booking wizard                |
-
----
-
-## Design System
-
-### Colors
-| Token            | Hex       | Usage                    |
-|------------------|-----------|--------------------------|
-| `ink-black`      | `#0A0A0A` | Page background          |
-| `ink-charcoal`   | `#141414` | Card backgrounds         |
-| `ink-graphite`   | `#1E1E1E` | Input backgrounds        |
-| `ink-steel`      | `#2A2A2A` | Borders                  |
-| `ink-silver`     | `#9A9A9A` | Body text                |
-| `ink-white`      | `#F5F5F0` | Headings                 |
-| `gold`           | `#C9A84C` | Accents, CTAs            |
-
-### Typography
-- **Display**: Cormorant Garamond — used for headings, logotype
-- **Body**: Inter — used for all UI text, labels, buttons
-
----
-
-## Booking Wizard Flow
+## Paystack Test Card
 
 ```
-Step 1: Artist & Service Selection
-  → Pick specific artist or "Any Artist"
-  → Choose Tattoo or Piercing
-  → If Piercing: pick placement
+Card:   4084 0840 8408 4081
+Expiry: Any future date
+CVV:    408
+PIN:    0000
+```
+No real money moves in test mode.
 
-Step 2: Creative Brief (Tattoo only)
-  → Flash: select from gallery
-  → Custom: placement + dimensions + reference image upload
+---
 
-Step 3: Schedule
-  → Calendar showing available dates (from backend)
-  → Consultation slots (30 min, free)
-  → Session blocks (multi-hour, deposit required)
+## API Reference
 
-Step 4: Health & Legal
-  → Age verification checkbox
-  → Health screening checklist
-  → Deposit policy acknowledgement
-  → Next button disabled until all checked
+```
+POST  /api/v1/auth/login/
+POST  /api/v1/auth/register/
+GET   /api/v1/auth/me/
+GET   /api/v1/auth/login-history/
 
-Step 5: Checkout
-  → Booking summary card
-  → Stripe payment UI (mockup)
-  → POST to Django API on confirm
+GET   /api/v1/studio/artists/
+GET   /api/v1/studio/services/
 
-Confirmation: Success screen with calendar link
+GET   /api/v1/bookings/consultation-slots/available/
+GET   /api/v1/bookings/session-blocks/available/
+POST  /api/v1/bookings/
+GET   /api/v1/bookings/my-bookings/
+
+POST  /api/v1/payments/initiate/
+POST  /api/v1/payments/verify/
+POST  /api/v1/payments/webhook/
 ```
 
 ---
 
-## Connecting to Backend
+## Course Context
 
-The API client in `src/lib/api.ts` connects to your Django backend.
-
-Make sure your `.env.local` has:
-```
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-The app gracefully falls back to sample data if the backend is unreachable, so the UI always renders even in development.
+**Course:** SEN 310 — Backend Development  
+**Institution:** Federal University of Technology, Owerri (FUTO)  
+**Purpose:** Demonstrate practical backend engineering — API design, authentication, payment integration, role-based access control, and full-stack integration.
 
 ---
 
-## Deployment
-
-```bash
-npm run build
-npm start
-```
-
-For Vercel: connect your GitHub repo, set `NEXT_PUBLIC_API_URL` to your Railway backend URL, and deploy.
+*Built in 2025–2026.*

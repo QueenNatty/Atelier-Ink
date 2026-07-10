@@ -8,6 +8,7 @@ import SmartImage from '@/components/ui/SmartImage'
 import { useWizardStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
+// Flash designs imported from scr/lib/images.ts
 
 export default function Step2Creative() {
   const {

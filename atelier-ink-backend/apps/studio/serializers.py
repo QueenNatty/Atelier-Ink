@@ -52,6 +52,8 @@ class ArtistSerializer(serializers.ModelSerializer):
 class ArtistListSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="user.full_name", read_only=True)
     specialty_names = serializers.SerializerMethodField()
+    # Return null explicitly when no avatar so frontend knows to use local file
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Artist
@@ -62,3 +64,7 @@ class ArtistListSerializer(serializers.ModelSerializer):
 
     def get_specialty_names(self, obj):
         return [s.name for s in obj.specialties.filter(is_active=True)]
+
+    def get_avatar_url(self, obj):
+        # Return None if empty so frontend SmartImage uses local file instead
+        return obj.avatar_url if obj.avatar_url else None

@@ -353,29 +353,15 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
   flex-direction: column;
   gap: 8px;
 }
-.login-footer .muted{
-  font-size: 12px;
-  color: var(--text-dim);
-  margin: 0 0 4px;
-}
 
 .back-link {
-  display: block;
-  padding: 10px 14px;
-  background: var(--ink);
-  font-weight: 600;
   font-size: 12.5px;
-  border-radius: 7px;
-  text-align: center;
-  color: var(--bone);
-  transition: background .15s;
-  text-decoration: none;
+  color: var(--accent);
+  text-decoration: underline;
   cursor: pointer;
 }
 
-.back-link:hover { color: #fff; 
-  background: var(--accent);
-}
+.back-link:hover { color: #99391f; }
 
 /* ---------- sidebar mobile toggle ---------- */
 .sidebar-toggle {

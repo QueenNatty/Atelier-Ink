@@ -2,11 +2,34 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { User, Sparkles, ChevronDown } from 'lucide-react'
+import { User, Sparkles } from 'lucide-react'
 import { useWizardStore } from '@/lib/store'
 import { studioApi } from '@/lib/api'
-import type { ArtistList, Service, PiercingPlacement } from '@/types'
+import type { ArtistList, PiercingPlacement } from '@/types'
 import { cn } from '@/lib/utils'
+import { ARTIST_IMAGES, ARTIST_FALLBACKS } from '@/lib/images'
+import SmartImage from '@/components/ui/SmartImage'
+
+const FALLBACK_ARTISTS: ArtistList[] = [
+  {
+    id: 1, full_name: 'Adaeze Okonkwo',
+    bio: 'Fine line & Afrocentric botanical work. Lagos-based.',
+    specialty_names: ['Fine Line', 'Botanical'],
+    avatar_url: null, is_accepting_clients: true, years_experience: 7,
+  },
+  {
+    id: 2, full_name: 'Emeka Nwosu',
+    bio: 'Igbo uli-inspired blackwork & neo-traditional.',
+    specialty_names: ['Blackwork', 'Neo-Traditional'],
+    avatar_url: null, is_accepting_clients: true, years_experience: 9,
+  },
+  {
+    id: 3, full_name: 'Zainab Bello',
+    bio: 'Piercing specialist & minimalist tattoo artist.',
+    specialty_names: ['Piercing', 'Minimalist'],
+    avatar_url: null, is_accepting_clients: true, years_experience: 5,
+  },
+]
 
 const PIERCING_PLACEMENTS: { value: PiercingPlacement; label: string }[] = [
   { value: 'lobe', label: 'Lobe' },
@@ -21,11 +44,41 @@ const PIERCING_PLACEMENTS: { value: PiercingPlacement; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
-const FALLBACK_ARTISTS: ArtistList[] = [
-  { id: 1, full_name: 'Adaeze Okonkwo', bio: 'Fine line Fine line botanical & single needle portraiture. Afrocentric botanical work. Lagos-based.', specialty_names: ['Fine Line', 'Botanical'], avatar_url: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&q=80', is_accepting_clients: true, years_experience: 8 },
-  { id: 2, full_name: 'Emeka Nwosu', bio: 'Igbo uli-inspired blackwork & neo-traditional.', specialty_names: ['Realism', 'Black & Grey'], avatar_url: 'https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=300&q=80', is_accepting_clients: true, years_experience: 6 },
-  { id: 3, full_name: 'Zainab Bello', bio: 'Piercing specialist & minimalist tattoo artist.', specialty_names: ['Geometric', 'Blackwork'], avatar_url: null, is_accepting_clients: false, years_experience: 10 },
-]
+// Map artist full names to local image keys
+const ARTIST_KEY: Record<string, string> = {
+  'Adaeze Okonkwo': 'adaeze',
+  'Emeka Nwosu': 'emeka',
+  'Zainab Bello': 'zainab',
+}
+
+function ArtistAvatar({ artist }: { artist: ArtistList }) {
+  // Check known artists by full name, then try first name lowercase as fallback key
+  const key = ARTIST_KEY[artist.full_name]
+    || artist.full_name.split(' ')[0].toLowerCase()
+  const localImg = ARTIST_IMAGES[key] || ''
+  const fallbackImg = artist.avatar_url || ARTIST_FALLBACKS[key] || ''
+
+  if (localImg || fallbackImg) {
+    return (
+      <SmartImage
+        local={localImg || fallbackImg}
+        fallback={fallbackImg || localImg}
+        alt={artist.full_name}
+        width={56}
+        height={56}
+        className="w-full h-full object-cover grayscale"
+      />
+    )
+  }
+
+  // New artist with no photo yet — show initials
+  const initials = artist.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+  return (
+    <div className="w-full h-full bg-ink-steel flex items-center justify-center">
+      <span className="font-display text-lg text-ink-mist">{initials}</span>
+    </div>
+  )
+}
 
 export default function Step1ArtistService() {
   const {
@@ -38,8 +91,12 @@ export default function Step1ArtistService() {
 
   useEffect(() => {
     studioApi.getArtists()
-      .then((res) => { if (res.data.length > 0) setArtists(res.data) })
-      .catch(() => {})
+      .then((res) => {
+        setArtists(res.data.length > 0 ? res.data : FALLBACK_ARTISTS)
+      })
+      .catch(() => {
+        setArtists(FALLBACK_ARTISTS)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -50,23 +107,18 @@ export default function Step1ArtistService() {
   return (
     <div>
       <p className="section-label mb-3">Step 1</p>
-      <h2 className="display-heading text-4xl text-ink-white mb-2">
-        Choose Your Artist
-      </h2>
+      <h2 className="display-heading text-4xl text-ink-white mb-2">Choose Your Artist</h2>
       <p className="font-body text-ink-silver mb-10">
         Select a specific artist or let us match you with the first available.
       </p>
 
-      {/* Artist cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         {/* Any artist card */}
         <button
           onClick={() => setAnyArtist(true)}
           className={cn(
             'relative text-left p-5 border transition-all duration-200 flex items-center gap-4',
-            anyArtist
-              ? 'border-gold bg-gold/10'
-              : 'border-ink-steel bg-ink-charcoal hover:border-ink-smoke'
+            anyArtist ? 'border-gold bg-gold/10' : 'border-ink-steel bg-ink-charcoal hover:border-ink-smoke'
           )}
         >
           <div className="w-14 h-14 bg-ink-steel flex items-center justify-center flex-shrink-0">
@@ -83,38 +135,34 @@ export default function Step1ArtistService() {
           )}
         </button>
 
-        {/* Artist cards */}
-        {artists.filter(a => a.is_accepting_clients).map((artist) => (
+        {/* Artist cards — all artists from backend, waitlisted ones greyed out */}
+        {artists.map((artist) => (
           <button
             key={artist.id}
-            onClick={() => setArtist(artist)}
+            onClick={() => artist.is_accepting_clients && setArtist(artist)}
+            disabled={!artist.is_accepting_clients}
             className={cn(
               'relative text-left p-5 border transition-all duration-200 flex items-center gap-4',
-              selectedArtist?.id === artist.id
+              !artist.is_accepting_clients
+                ? 'border-ink-steel bg-ink-graphite opacity-50 cursor-not-allowed'
+                : selectedArtist?.id === artist.id
                 ? 'border-gold bg-gold/10'
                 : 'border-ink-steel bg-ink-charcoal hover:border-ink-smoke'
             )}
           >
             <div className="w-14 h-14 overflow-hidden flex-shrink-0 bg-ink-steel">
-              {artist.avatar_url ? (
-                <Image
-                  src={artist.avatar_url}
-                  alt={artist.full_name}
-                  width={56}
-                  height={56}
-                  className="w-full h-full object-cover grayscale"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User size={24} className="text-ink-ash" />
-                </div>
-              )}
+              <ArtistAvatar artist={artist} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-display text-lg text-ink-white">{artist.full_name}</p>
               <p className="font-body text-xs text-ink-silver mt-0.5 truncate">
                 {artist.specialty_names.join(' · ')}
               </p>
+              {!artist.is_accepting_clients && (
+                <p className="font-body text-2xs text-ink-ash tracking-widest uppercase mt-1">
+                  On waitlist
+                </p>
+              )}
             </div>
             {selectedArtist?.id === artist.id && (
               <div className="absolute top-3 right-3 w-5 h-5 bg-gold flex items-center justify-center flex-shrink-0">
@@ -128,7 +176,7 @@ export default function Step1ArtistService() {
       {/* Service type toggle */}
       {artistSelected && (
         <div className="mt-10 animate-fade-in">
-          <p className="font-body text-sm text-ink-silver mb-4 tracking-wide uppercase text-xs">
+          <p className="font-body text-xs text-ink-silver mb-4 tracking-widest uppercase">
             What type of service?
           </p>
           <div className="flex gap-3">
@@ -150,10 +198,10 @@ export default function Step1ArtistService() {
         </div>
       )}
 
-      {/* Piercing placement picker */}
+      {/* Piercing placement */}
       {serviceType === 'piercing' && (
         <div className="mt-8 animate-fade-in">
-          <p className="font-body text-xs text-ink-silver mb-4 tracking-wide uppercase">
+          <p className="font-body text-xs text-ink-silver mb-4 tracking-widest uppercase">
             Placement
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -175,15 +223,11 @@ export default function Step1ArtistService() {
         </div>
       )}
 
-      {/* Next */}
       <div className="mt-12 flex justify-end">
         <button
           onClick={nextStep}
           disabled={!canProceed}
-          className={cn(
-            'btn-primary',
-            !canProceed && 'opacity-40 cursor-not-allowed hover:scale-100'
-          )}
+          className={cn('btn-primary', !canProceed && 'opacity-40 cursor-not-allowed hover:scale-100')}
         >
           Continue
         </button>
