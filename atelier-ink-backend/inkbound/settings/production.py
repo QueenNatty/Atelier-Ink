@@ -1,3 +1,4 @@
+from corsheaders.defaults import default_headers
 from .base import *  # noqa
 from decouple import config, Csv
 import os
@@ -19,6 +20,7 @@ CORS_ALLOWED_ORIGINS =  [
     os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
     "https://atelier-ink.onrender.com"
 ]
+CORS_ALLOW_HEADERS = list(default_headers) + ["cache-control"],
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
