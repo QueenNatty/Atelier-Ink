@@ -5,7 +5,7 @@ import dj_database_url
 
 DEBUG = False
 
-ALLOWED_HOSTS=['https://atelier-ink-backend.onrender.com']
+ALLOWED_HOSTS=[".onrender.com"]
 
 DATABASES = {
     "default": dj_database_url.config(
