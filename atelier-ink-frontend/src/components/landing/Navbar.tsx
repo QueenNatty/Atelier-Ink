@@ -26,7 +26,7 @@ export default function Navbar() {
   }
 
   const isStaff = user?.role === 'admin' || user?.role === 'artist'
-  const STAFF_URL = 'http://localhost:8000/staff/'
+  const STAFF_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }/staff/`
 
   return (
     <header className={cn(

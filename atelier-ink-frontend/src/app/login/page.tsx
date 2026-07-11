@@ -46,7 +46,7 @@ function LoginForm() {
       router.push(next)
     } else if (user.role === 'admin' || user.role === 'artist') {
       // Redirect staff to the staff portal
-      window.location.href = 'http://localhost:8000/staff/'
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/staff/`
     } else {
       router.push('/book')
     }
@@ -117,7 +117,7 @@ function LoginForm() {
 
         {/* Staff portal direct link */}
         <div className="mt-6 text-center">
-          <a href="http://localhost:8000/staff/login/"
+          <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/staff/`}
             className="inline-flex items-center gap-2 font-body text-xs text-ink-ash hover:text-gold transition-colors tracking-widest uppercase">
             Staff Portal <ArrowRight size={12} />
           </a>
