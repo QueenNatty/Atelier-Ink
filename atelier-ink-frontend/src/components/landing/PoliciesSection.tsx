@@ -4,17 +4,17 @@ const policies = [
   {
     icon: DollarSign,
     title: 'Shop Minimum',
-    content: 'All tattoo work has a $150 shop minimum regardless of size. This covers setup, materials, and artist time. Piercings start at $40 including jewellery.',
+    content: 'All tattoo work has a  ₦5000 shop minimum regardless of size. This covers setup, materials, and artist time. Piercings start at  ₦4000 including jewelry.',
   },
   {
     icon: Users,
     title: 'Age Requirements',
-    content: 'You must be 18 or older with a valid government-issued photo ID. We do not tattoo minors under any circumstances — no exceptions.',
+    content: 'You must be 18 or older with a valid government issued photo ID. We do not tattoo minors under any circumstances, no exceptions.',
   },
   {
     icon: DollarSign,
     title: 'Non-Refundable Deposits',
-    content: 'A deposit is required to secure all bookings. Deposits go toward the total cost of your piece and are non-refundable if you cancel within 48 hours or no-show.',
+    content: 'A deposit is required to secure all bookings. Deposits go toward the total cost of your piece and are non-refundable if you cancel within 48 hours or a no show.',
   },
   {
     icon: Clock,
