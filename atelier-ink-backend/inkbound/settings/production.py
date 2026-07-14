@@ -20,7 +20,7 @@ CORS_ALLOWED_ORIGINS =  [
     os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
     "https://atelier-ink.onrender.com"
 ]
-CORS_ALLOW_HEADERS = list(default_headers) + ["cache-control"],
+CORS_ALLOW_HEADERS = list(default_headers) + ["cache-control","content-type", "authorization","accept","user-agent",]
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
